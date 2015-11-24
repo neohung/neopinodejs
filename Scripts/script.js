@@ -6,17 +6,16 @@ $(document).ready(function () {
 
     var settings = {
         host: 'ws://localhost:9000',
-        pictureContainerID: 'pictureContainer',
-        pictureID: 'picture',
+        canvasContainerID: 'myCanvas',
         titleID: 'title'
     };
 
     $("#consoleMsg").html("Try connect!!!" );
-    pixSocket.connect(settings);
+    neoSocket.connect(settings);
 	
 });
 
-var pixSocket = function() {
+var neoSocket = function() {
     var settings,
 
     connect = function(_settings) {
@@ -30,35 +29,21 @@ var pixSocket = function() {
         connection.onmessage = function (message) {
             var msg = JSON.parse(message.data);
 	       $("#consoleMsg" ).html("onmessage:"+ msg.src+","+msg.date);
-		   //
-		   var picContainer = $('#' + settings.pictureContainerID);
-		   picContainer.fadeOut(0, function() {
-		   $('#' + settings.pictureID).attr('src', msg.src+"?"+msg.date);
-		   $('#' + settings.titleID).html(msg.text);
-		   picContainer.fadeIn(0);
-		   });
-		   //
-           //showPicture(pix.media.m, pix.title);
+		   var canvas = document.getElementById(settings.canvasContainerID);
+           var context = canvas.getContext('2d');
+           //var context = canvas.getContext('2d');
+           var imageObj = new Image();
+           imageObj.src = msg.src+"?"+msg.date;
+           imageObj.onload = function() {
+             context.drawImage(imageObj, 69, 50);
+           };
+           
+           $('#' + settings.titleID).html(msg.text);
         };
-	connection.onclose = function (event){
-	    $("#consoleMsg" ).html("websocket close!!!");
-	};
-    },
-
-    showPicture = function(src, title) {
-        var picContainer = $('#' + settings.pictureContainerID);
-		$("#consoleMsg" ).html("show image");
-        //picContainer.fadeOut(500, function() {
-        //$('#' + settings.pictureID).attr('src', src);
-		//i = i % 5;
-		//i++;
-	    //d = new Date();
-	    //$('#' + settings.pictureID).attr('src', "/num/1.jpg?"+d.getTime());
-        //$('#' + settings.titleID).html(title);
-         //   picContainer.fadeIn(500);
-        //});
+	    connection.onclose = function (event){
+	       $("#consoleMsg" ).html("websocket close!!!");
+	    };
     };
-
     return {
         connect: connect
     };
